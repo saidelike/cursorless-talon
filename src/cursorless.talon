@@ -15,7 +15,7 @@ tag: user.cursorless
 {user.cursorless_paste_action} <user.cursorless_destination>:
     user.private_cursorless_paste(cursorless_destination)
 
-{user.cursorless_reformat_action} <user.formatters> at <user.cursorless_target>:
+<user.formatters> {user.cursorless_reformat_action} <user.cursorless_target>:
     user.private_cursorless_reformat(cursorless_target, formatters)
 
 <user.cursorless_wrapper_paired_delimiter> {user.cursorless_wrap_action} <user.cursorless_target>:
