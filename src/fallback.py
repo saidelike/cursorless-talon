@@ -59,7 +59,7 @@ class UserActions:
                 paired_delimiter,
             )
         else:
-            actions.next(action_type, target, cursorless_wrapper)
+            actions.next(action_name, target, paired_delimiter)
 
 
 def perform_fallback_command(action_name: str, target: CursorlessTarget, args: Any = None):
