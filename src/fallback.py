@@ -1,7 +1,6 @@
 from talon import Context, actions
 from typing import Any
 from .targets.target_types import CursorlessTarget, PrimitiveTarget
-from .paired_delimiter import PairedDelimiter
 
 ctx = Context()
 ctx.matches = r"""
@@ -20,7 +19,7 @@ fallback_action_callbacks = {
     "editNewLineAfter": actions.edit.line_insert_down,
     "nextHomophone": actions.user.homophones_cycle_selected,
     "wrapWithPairedDelimiter": lambda pair: actions.user.delimiters_pair_wrap_selection_with(
-        pair.left, pair.right
+        pair[0], pair[1]
     ),
 }
 
@@ -50,7 +49,7 @@ class UserActions:
             actions.next(target, formatters)
 
     def private_cursorless_wrap_with_paired_delimiter(
-        action_name: str, target: CursorlessTarget, paired_delimiter: PairedDelimiter
+        action_name: str, target: CursorlessTarget, paired_delimiter: list[str]
     ):
         if use_fallback(target):
             perform_fallback_command(
@@ -62,7 +61,9 @@ class UserActions:
             actions.next(action_name, target, paired_delimiter)
 
 
-def perform_fallback_command(action_name: str, target: CursorlessTarget, args: Any = None):
+def perform_fallback_command(
+    action_name: str, target: CursorlessTarget, args: Any = None
+):
     """Perform non Cursorless fallback command"""
     actions.user.debug(
         "Current command targets selection and is not in a text editor. Perform fallback command."
@@ -110,5 +111,7 @@ def target_is_selection(target: CursorlessTarget) -> bool:
 
 
 def focused_element_is_text_editor() -> bool:
-    element_type = actions.user.run_rpc_command_get("command-server.getFocusedElementType")
+    element_type = actions.user.run_rpc_command_get(
+        "command-server.getFocusedElementType"
+    )
     return element_type == "textEditor"
