@@ -1,11 +1,33 @@
 from talon import Context, actions
-from typing import Any
-from .targets.target_types import CursorlessTarget, PrimitiveTarget
+from typing import Any, Union
+from .actions.bring_move import BringMoveTargets
+from .targets.target_types import (
+    CursorlessDestination,
+    CursorlessTarget,
+    ImplicitDestination,
+    ImplicitTarget,
+    PrimitiveDestination,
+    PrimitiveTarget,
+)
+from .actions.get_text import cursorless_get_text_action
 
 ctx = Context()
 ctx.matches = r"""
 mode: command
 """
+
+
+def replace_with_target(target: CursorlessTarget):
+    """Insert target as text"""
+    texts = cursorless_get_text_action(target)
+    text = "\n".join(texts)
+    actions.insert(text)
+
+
+def wrap_with_paired_delimiter(pair: list[str]):
+    """Wrap selection with paired delimiters"""
+    actions.user.delimiters_pair_wrap_selection_with(pair[0], pair[1])
+
 
 fallback_action_callbacks = {
     "setSelection": actions.skip,
@@ -18,9 +40,8 @@ fallback_action_callbacks = {
     "editNewLineBefore": actions.edit.line_insert_up,
     "editNewLineAfter": actions.edit.line_insert_down,
     "nextHomophone": actions.user.homophones_cycle_selected,
-    "wrapWithPairedDelimiter": lambda pair: actions.user.delimiters_pair_wrap_selection_with(
-        pair[0], pair[1]
-    ),
+    "replaceWithTarget": replace_with_target,
+    "wrapWithPairedDelimiter": wrap_with_paired_delimiter,
 }
 
 fallback_target_callbacks = {
@@ -60,9 +81,17 @@ class UserActions:
         else:
             actions.next(action_name, target, paired_delimiter)
 
+    def private_cursorless_bring_move(action_name: str, targets: BringMoveTargets):
+        if use_fallback(targets.destination):
+            perform_fallback_command(action_name, targets.destination, targets.source)
+        else:
+            actions.next(action_name, targets)
+
 
 def perform_fallback_command(
-    action_name: str, target: CursorlessTarget, args: Any = None
+    action_name: str,
+    target: Union[CursorlessTarget, CursorlessDestination],
+    args: Any = None,
 ):
     """Perform non Cursorless fallback command"""
     actions.user.debug(
@@ -76,7 +105,7 @@ def perform_fallback_command(
             action_callback(args)
         else:
             action_callback()
-    except Exception as ex:
+    except ValueError as ex:
         actions.app.notify(str(ex))
 
 
@@ -87,10 +116,19 @@ def get_fallback_action_callback(action_name: str):
     raise ValueError(f"Unknown Cursorless fallback action: {action_name}")
 
 
-def get_fallback_target_callback(target: CursorlessTarget):
+def get_fallback_target_callback(
+    target: Union[CursorlessTarget, CursorlessDestination]
+):
     """Get target selection callable"""
+    if isinstance(target, (ImplicitTarget, ImplicitDestination)):
+        return fallback_target_callbacks["selection"]
+
+    if isinstance(target, PrimitiveDestination):
+        return get_fallback_target_callback(target.target)
+
     if not target.modifiers:
         return fallback_target_callbacks["selection"]
+
     if len(target.modifiers) == 1:
         modifier = target.modifiers[0]
         modifier_type = modifier["type"]
@@ -99,20 +137,24 @@ def get_fallback_target_callback(target: CursorlessTarget):
         if modifier_type in fallback_target_callbacks:
             return fallback_target_callbacks[modifier_type]
         raise ValueError(f"Unknown Cursorless fallback modifier type: {modifier_type}")
+
     raise ValueError(f"Unknown Cursorless fallback target: {target}")
 
 
-def use_fallback(target: CursorlessTarget) -> bool:
+def use_fallback(target: Union[CursorlessTarget, CursorlessDestination]) -> bool:
     """Returns true if fallback is to be used"""
     return target_is_selection(target) and not focused_element_is_text_editor()
 
 
-def target_is_selection(target: CursorlessTarget) -> bool:
+def target_is_selection(target: Union[CursorlessTarget, CursorlessDestination]) -> bool:
     """Returns true if target is selection"""
-    print(target)
-    if not isinstance(target, PrimitiveTarget):
-        return False
-    return not target.mark or target.mark["type"] == "cursor"
+    if isinstance(target, (ImplicitTarget, ImplicitDestination)):
+        return True
+    if isinstance(target, PrimitiveDestination):
+        return target_is_selection(target.target)
+    if isinstance(target, PrimitiveTarget):
+        return not target.mark or target.mark["type"] == "cursor"
+    return False
 
 
 def focused_element_is_text_editor() -> bool:
