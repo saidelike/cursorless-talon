@@ -81,12 +81,14 @@ def perform_fallback_command(
 
 
 def get_fallback_action_callback(action_name: str):
+    """Return action callback"""
     if action_name in fallback_action_callbacks:
         return fallback_action_callbacks[action_name]
-    raise Exception(f"Unknown Cursorless fallback action: {action_name}")
+    raise ValueError(f"Unknown Cursorless fallback action: {action_name}")
 
 
 def get_fallback_target_callback(target: CursorlessTarget):
+    """Get target selection callable"""
     if not target.modifiers:
         return fallback_target_callbacks["selection"]
     if len(target.modifiers) == 1:
@@ -96,21 +98,25 @@ def get_fallback_target_callback(target: CursorlessTarget):
             modifier_type = f"containing_{modifier['scopeType']['type']}"
         if modifier_type in fallback_target_callbacks:
             return fallback_target_callbacks[modifier_type]
-        raise Exception(f"Unknown Cursorless fallback modifier type: {modifier_type}")
-    raise Exception(f"Unknown Cursorless fallback target: {target}")
+        raise ValueError(f"Unknown Cursorless fallback modifier type: {modifier_type}")
+    raise ValueError(f"Unknown Cursorless fallback target: {target}")
 
 
 def use_fallback(target: CursorlessTarget) -> bool:
+    """Returns true if fallback is to be used"""
     return target_is_selection(target) and not focused_element_is_text_editor()
 
 
 def target_is_selection(target: CursorlessTarget) -> bool:
-    if type(target) != PrimitiveTarget:
+    """Returns true if target is selection"""
+    print(target)
+    if not isinstance(target, PrimitiveTarget):
         return False
     return not target.mark or target.mark["type"] == "cursor"
 
 
 def focused_element_is_text_editor() -> bool:
+    """Returns true if text editor is focused"""
     element_type = actions.user.run_rpc_command_get(
         "command-server.getFocusedElementType"
     )
