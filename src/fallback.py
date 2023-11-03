@@ -13,7 +13,8 @@ from .actions.get_text import cursorless_get_text_action
 
 ctx = Context()
 ctx.matches = r"""
-mode: command
+app: vscode
+not win.title: /\[Text Editor\]$/
 """
 
 
@@ -143,7 +144,7 @@ def get_fallback_target_callback(
 
 def use_fallback(target: Union[CursorlessTarget, CursorlessDestination]) -> bool:
     """Returns true if fallback is to be used"""
-    return target_is_selection(target) and not focused_element_is_text_editor()
+    return target_is_selection(target)
 
 
 def target_is_selection(target: Union[CursorlessTarget, CursorlessDestination]) -> bool:
@@ -155,11 +156,3 @@ def target_is_selection(target: Union[CursorlessTarget, CursorlessDestination]) 
     if isinstance(target, PrimitiveTarget):
         return not target.mark or target.mark["type"] == "cursor"
     return False
-
-
-def focused_element_is_text_editor() -> bool:
-    """Returns true if text editor is focused"""
-    element_type = actions.user.run_rpc_command_get(
-        "command-server.getFocusedElementType"
-    )
-    return element_type == "textEditor"
