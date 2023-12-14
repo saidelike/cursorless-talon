@@ -1,7 +1,7 @@
 from talon import Context, actions
 from typing import Any, Union
-from .actions.bring_move import BringMoveTargets
-from .targets.target_types import (
+from ..actions.bring_move import BringMoveTargets
+from ..targets.target_types import (
     CursorlessDestination,
     CursorlessTarget,
     ImplicitDestination,
@@ -9,12 +9,12 @@ from .targets.target_types import (
     PrimitiveDestination,
     PrimitiveTarget,
 )
-from .actions.get_text import cursorless_get_text_action
+from ..actions.get_text import cursorless_get_text_action
 
 ctx = Context()
 ctx.matches = r"""
 app: vscode
-not win.title: /\[Text Editor\]$/
+not tag: user.cursorless_in_text_editor
 """
 
 
