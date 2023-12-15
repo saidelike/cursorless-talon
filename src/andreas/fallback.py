@@ -14,7 +14,7 @@ from ..actions.get_text import cursorless_get_text_action
 ctx = Context()
 ctx.matches = r"""
 app: vscode
-not tag: user.cursorless_in_text_editor
+not win.title: /\[Text Editor\]$/
 """
 
 
@@ -87,6 +87,13 @@ class UserActions:
             perform_fallback_command(action_name, targets.destination, targets.source)
         else:
             actions.next(action_name, targets)
+
+    def private_cursorless_paste(destination: CursorlessDestination):
+        action_name = "pasteFromClipboard"
+        if use_fallback(destination):
+            perform_fallback_command(action_name, destination)
+        else:
+            actions.next(action_name, destination)
 
 
 def perform_fallback_command(
