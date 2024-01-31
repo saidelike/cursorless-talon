@@ -32,6 +32,8 @@ def wrap_with_paired_delimiter(pair: list[str]):
 
 fallback_action_callbacks = {
     "setSelection": actions.skip,
+    "setSelectionBefore": actions.edit.left,
+    "setSelectionAfter": actions.edit.right,
     "copyToClipboard": actions.edit.copy,
     "cutToClipboard": actions.edit.cut,
     "pasteFromClipboard": actions.edit.paste,
