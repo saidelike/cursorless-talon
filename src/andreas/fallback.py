@@ -107,9 +107,14 @@ def perform_fallback_command(
     actions.user.debug(
         "Current command targets selection and is not in a text editor. Perform fallback command."
     )
+    # actions.user.debug(f"perform_fallback_command({action_name}, {target}, {args})")
+
     try:
         action_callback = get_fallback_action_callback(action_name)
         target_callback = get_fallback_target_callback(target)
+        # actions.user.debug(
+        #     f"action_callback = {action_callback}, target_callback = {target_callback}"
+        # )
         target_callback()
         if args is not None:
             action_callback(args)
