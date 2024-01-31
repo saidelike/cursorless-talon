@@ -15,6 +15,8 @@ tag: user.cursorless
 {user.cursorless_paste_action} <user.cursorless_destination>:
     user.private_cursorless_paste(cursorless_destination)
 
+# we prefer "camel format air" to "format title at air"
+# {user.cursorless_reformat_action} <user.formatters> at <user.cursorless_target>:
 <user.formatters> {user.cursorless_reformat_action} <user.cursorless_target>:
     user.private_cursorless_reformat(cursorless_target, formatters)
 
