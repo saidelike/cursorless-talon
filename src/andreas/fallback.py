@@ -47,8 +47,12 @@ fallback_action_callbacks = {
     "wrapWithPairedDelimiter": wrap_with_paired_delimiter,
 }
 
+# TODO: "this" does not work yet when targeting the "git status" commit message field,
+# because edit.copy() copies the whole current line, even if nothing is selected
+# see https://github.com/microsoft/vscode/issues/205864
+# at the moment we can't use: "phones this", "take this", ...
 fallback_target_callbacks = {
-    "selection": actions.skip,
+    "selection": actions.user.set_selection_on_word_if_none,  # "this"
     "extendThroughStartOf": actions.user.select_line_start,
     "extendThroughEndOf": actions.user.select_line_end,
     "containing_document": actions.edit.select_all,
