@@ -21,6 +21,10 @@ action_callbacks = {
     "editNewLineAfter": actions.edit.line_insert_down,
 }
 
+# TODO: "this" does not work yet when targeting the "git status" commit message field,
+# because edit.copy() copies the whole current line, even if nothing is selected
+# see https://github.com/microsoft/vscode/issues/205864
+# at the moment we can't use: "phones this", "take this",
 modifier_callbacks = {
     "extendThroughStartOf.line": actions.user.select_line_start,
     "extendThroughEndOf.line": actions.user.select_line_end,
