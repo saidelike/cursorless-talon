@@ -37,6 +37,7 @@ class Actions:
             CURSORLESS_COMMAND_ID,
             construct_cursorless_command(action),
         )
+        actions.user.debug(f"cursorless response={response}")
         if "fallback" in response:
             perform_fallback(response["fallback"])
 
